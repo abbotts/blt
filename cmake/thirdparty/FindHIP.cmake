@@ -663,14 +663,6 @@ macro(HIP_ADD_EXECUTABLE hip_target)
     else()
         add_executable(${hip_target} ${_cmake_options} ${_generated_files} ${_sources})
     endif()
-<<<<<<< HEAD
-    if ("${_sources}" STREQUAL "")
-        add_executable(${hip_target} ${_cmake_options} ${_generated_files} "")
-    else()
-        add_executable(${hip_target} ${_cmake_options} ${_generated_files} ${_sources})
-    endif()
-=======
->>>>>>> beb5895f3f28893ddceba46621e7853b60c46b12
     set_target_properties(${hip_target} PROPERTIES LINKER_LANGUAGE HIP)
     # Link with host
     if (HIP_HOST_INTERFACE)
