@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019, Lawrence Livermore National Security, LLC and
+# Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
 # other BLT Project Developers. See the top-level COPYRIGHT file for details
 #
 # SPDX-License-Identifier: (BSD-3-Clause)
@@ -53,7 +53,9 @@ execute_process(COMMAND ${HIP_HIPCONFIG_EXECUTABLE} --compiler OUTPUT_VARIABLE H
 execute_process(COMMAND ${HIP_HIPCONFIG_EXECUTABLE} --runtime OUTPUT_VARIABLE HIP_RUNTIME OUTPUT_STRIP_TRAILING_WHITESPACE)
 if(NOT host_flag)
     set(__CC ${HIP_HIPCC_EXECUTABLE})
-    if("${HIP_PLATFORM}" STREQUAL "hcc")
+    # ROCm version 4.0 and higher will use amd for the platform, but older
+    # versions use hcc. Keep both for backwards compatibility.
+    if("${HIP_PLATFORM}" STREQUAL "hcc" OR "${HIP_PLATFORM}" STREQUAL "amd")
         if("${HIP_COMPILER}" STREQUAL "hcc")
             if(NOT "x${HCC_HOME}" STREQUAL "x")
                 set(ENV{HCC_HOME} ${HCC_HOME})

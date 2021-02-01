@@ -1,4 +1,4 @@
-.. # Copyright (c) 2017-2019, Lawrence Livermore National Security, LLC and
+.. # Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
 .. # other BLT Project Developers. See the top-level COPYRIGHT file for details
 .. # 
 .. # SPDX-License-Identifier: (BSD-3-Clause)
@@ -12,38 +12,60 @@ To accomplish this BLT provides a ``DEPENDS_ON`` option for the
 ``blt_add_library()`` and ``blt_add_executable()`` macros that supports both CMake targets 
 and external dependencies registered using the ``blt_register_library()`` macro.
 
-The ``blt_register_library()`` macro allows you to reuse all information needed
+The ``blt_import_library()`` macro allows you to reuse all information needed
 for an external dependency under a single name.  This includes any include
 directories, libraries, compile flags, link flags, defines, etc.  You can also
 hide any warnings created by their headers by setting the
 ``TREAT_INCLUDES_AS_SYSTEM`` argument.
 
-For example, to find and register the external dependency *axom* as a BLT registered library, you can simply use:
+For example, to find and add the external dependency *axom* as a CMake target, you can simply use:
 
 .. code-block:: cmake
 
     # FindAxom.cmake takes in AXOM_DIR, which is a installed Axom build and
     # sets variables AXOM_INCLUDES, AXOM_LIBRARIES
     include(FindAxom.cmake)
-    blt_register_library(NAME      axom
-                         TREAT_INCLUDES_AS_SYSTEM ON
-                         DEFINES   HAVE_AXOM=1
-                         INCLUDES  ${AXOM_INCLUDES}
-                         LIBRARIES ${AXOM_LIBRARIES})
+    blt_import_library(NAME      axom
+                       TREAT_INCLUDES_AS_SYSTEM ON
+                       DEFINES    HAVE_AXOM=1
+                       INCLUDES   ${AXOM_INCLUDES}
+                       LIBRARIES  ${AXOM_LIBRARIES}
+                       EXPORTABLE ON)
 
 Then *axom* is available to be used in the DEPENDS_ON list in the following
-``blt_add_executable()`` or ``blt_add_library()`` calls.
+``blt_add_executable()`` or ``blt_add_library()`` calls, or in any CMake command that accepts a target.
 
-This is especially helpful for external libraries that are not built with CMake
-and don't provide CMake-friendly imported targets. Our ultimate goal is to use ``blt_register_library()`` 
-to import all external dependencies as first-class imported CMake targets to take full advanced of CMake's dependency lattice. 
+CMake targets created by ``blt_import_library()`` are ``INTERFACE`` libraries that can be installed
+and exported if the ``EXPORTABLE`` option is enabled.  For example, if the ``calc_pi`` project depends on
+Axom, it could export its ``axom`` target.  To avoid introducing target name conflicts for users of the
+``calc_pi`` project who might also create a target called ``axom``, ``axom`` should be exported as
+``calc_pi::axom``.
 
-MPI, CUDA, and OpenMP are all registered via ``blt_register_library()``. 
-You can see how in ``blt/thirdparty_builtin/CMakelists.txt``.
+This is especially helpful for "converting" external libraries that are not built with CMake
+into CMake-friendly imported targets.
 
 BLT also supports using ``blt_register_library()`` to provide additional options for existing CMake targets. 
 The implementation doesn't modify the properties of the existing targets, 
 it just exposes these options via BLT's support for  ``DEPENDS_ON``.
+
+This first-class importing functionality provided by ``blt_import_library()`` should be preferred, but ``blt_register_library()`` is
+still available for compatibility.  ``blt_import_library()`` is generally usable as a drop-in replacement, 
+though it does not support the creation of targets with the same name as a target that already exists.  
+
+.. note::
+    Because CMake targets are only accessible from within the directory they were defined (including
+    subdirectories), the ``include()`` command should be preferred to the ``add_subdirectory()`` command for adding CMake files
+    that create imported library targets needed in other directories. The GLOBAL option to ``blt_import_library()``
+    can also be used to manage visibility.
+
+BLT's ``mpi``, ``cuda``, ``cuda_runtime``, and ``openmp`` targets are all defined via ``blt_import_library()``. 
+You can see how in ``blt/thirdparty_builtin/CMakelists.txt``.  If your project exports targets and you would like
+BLT's provided third-party targets to also be exported (for example, if a project that imports your project does not
+use BLT), you can set the ``BLT_EXPORT_THIRDPARTY`` option to ``ON``.  As with other EXPORTABLE targets created by
+``blt_import_library()``, these targets should be prefixed with the name of the project.  Either the ``EXPORT_NAME``
+target property or the ``NAMESPACE`` option to CMake's ``install`` command can be used to modify the name of an
+installed target.  See the "Exporting BLT Targets" page for more info.
+
 
 .. admonition:: blt_register_library
    :class: hint

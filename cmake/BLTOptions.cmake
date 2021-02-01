@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019, Lawrence Livermore National Security, LLC and
+# Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
 # other BLT Project Developers. See the top-level COPYRIGHT file for details
 # 
 # SPDX-License-Identifier: (BSD-3-Clause)
@@ -36,6 +36,8 @@ option(ENABLE_VALGRIND     "Enables Valgrind support" ON)
 option(ENABLE_ASTYLE       "Enables AStyle support" ON)
 option(ENABLE_CLANGFORMAT  "Enables ClangFormat support" ON)
 option(ENABLE_UNCRUSTIFY   "Enables Uncrustify support" ON)
+option(ENABLE_YAPF         "Enables Yapf support" ON)
+option(ENABLE_CMAKEFORMAT  "Enables CMakeFormat support" ON)
 
 #------------------------------------------------------------------------------
 # Build Options
@@ -83,6 +85,7 @@ endif()
 option(ENABLE_GTEST        "Enable Google Test testing support (if ENABLE_TESTS=ON)" ${_CXX_enabled})
 option(ENABLE_GMOCK        "Enable Google Mock testing support (if ENABLE_TESTS=ON)" OFF)
 option(ENABLE_FRUIT        "Enable Fruit testing support (if ENABLE_TESTS=ON and ENABLE_FORTRAN=ON)" ON)
+option(ENABLE_FRUIT_MPI    "Enable Fruit MPI testing support (if ENABLE_TESTS=ON and ENABLE_FORTRAN=ON and ENABLE_FRUIT=ON and ENABLE_MPI=ON" OFF)
 option(ENABLE_GBENCHMARK   "Enable Google Benchmark support (if ENABLE_TESTS=ON)" ${ENABLE_BENCHMARKS})
 
 
@@ -107,6 +110,11 @@ mark_as_advanced(BLT_ENABLE_MSVC_STATIC_MD_TO_MT)
 # Generator Options
 #------------------------------------------------------------------------------
 option(ENABLE_FOLDERS "Organize projects using folders (in generators that support this)" OFF)
+
+#------------------------------------------------------------------------------
+# Export/Install Options
+#------------------------------------------------------------------------------
+option(BLT_EXPORT_THIRDPARTY "Configure the third-party targets created by BLT to be exportable" OFF)
 
 #------------------------------------------------------------------------------
 # Advanced configuration options

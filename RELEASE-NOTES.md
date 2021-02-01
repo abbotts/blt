@@ -22,11 +22,26 @@ The project release numbers follow [Semantic Versioning](http://semver.org/spec/
   ``BLT_REQUIRED_ASTYLE_VERSION``, ``BLT_REQUIRED_CLANGFORMAT_VERSION``, and ``BLT_REQUIRED_UNCRUSTIFY_VERSION``
 - Added ``HEADERS`` to ``blt_add_executable``.  This is important for build system dependency tracking
   and IDE folder support.
+- Added support for formatting Python code using YAPF.
+- Added new ``blt_import_library`` macro that creates a real CMake target for imported libraries,
+  intended to be used instead of ``blt_register_library`` whenever possible
+- Added new ``blt_patch_target`` macro to simplify modifying properties of an existing CMake target.
+  This macro accounts for known differences in compilers, target types, and CMake releases.
+- Added support for formatting CMake code using cmake-format.
+- Added an EXPORTABLE option to ``blt_import_library`` that allows imported libraries to be
+  added to an export set and installed.
+- Added FRUIT's MPI parallel unit test reporting to BLT's internal copy of FRUIT
 
 ### Changed
 - MPI Support when using CMake 3.13 and newer: MPI linker flags are now passed
   as single string prefixed by ``SHELL:`` to prevent de-duplication of flags
   passed to ``target_link_options``.
+- For HIP-dependent builds, only add HCC include directory if it exists.
+- HIP CMake utilities updated to AMD's latest version
+- Updated ``add_code_coverage_target`` to ``blt_add_code_coverage_target``, which now supports
+  user-specified source directories
+- Code coverage targets leave LCOV-generated files intact for later use; these files will
+  still be removed by ``make clean``
 
 ### Fixed
 - ClangFormat checks now support multiple Python executable names
@@ -46,6 +61,17 @@ The project release numbers follow [Semantic Versioning](http://semver.org/spec/
   blt_add_code_checks; previously, these combinations were implied to
   be errors in BLT documentation, but BLT would not return an error in
   those cases.
+- ``blt_patch_target`` no longer attempts to set system include directories when a target
+  has no include directories
+- Header-only libraries now can have dependencies via DEPENDS_ON in ``blt_add_library``
+- Added a workaround for include directories of imported targets on PGI. CMake was 
+  erroneously marking them as SYSTEM but this is not supported by PGI.
+- Check added to make sure that if HIP is enabled with fortran, the LINKER LANGUAGE
+  is not changed back to Fortran.
+- Executables that link to libraries that depend on `hip`/`hip_runtime`/`cuda`/`cuda_runtime`
+  will automatically be linked with the HIP or CUDA (NVCC) linker
+- Patched an issue with the FindHIP macros that added the inclusive scan of specified
+  DEFINEs to compile commands
 
 ## [Version 0.3.6] - Release date 2020-07-27
 

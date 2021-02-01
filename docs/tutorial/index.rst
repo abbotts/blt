@@ -1,4 +1,4 @@
-.. # Copyright (c) 2017-2019, Lawrence Livermore National Security, LLC and
+.. # Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
 .. # other BLT Project Developers. See the top-level COPYRIGHT file for details
 .. # 
 .. # SPDX-License-Identifier: (BSD-3-Clause)
@@ -33,5 +33,6 @@ Parts of the tutorial also require MPI, CUDA, Sphinx and Doxygen.
     using_flags
     unit_testing
     external_dependencies
+    exporting_blt_targets
     creating_documentation
     recommendations

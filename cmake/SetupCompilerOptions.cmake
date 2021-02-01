@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019, Lawrence Livermore National Security, LLC and
+# Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
 # other BLT Project Developers. See the top-level COPYRIGHT file for details
 # 
 # SPDX-License-Identifier: (BSD-3-Clause)
@@ -83,6 +83,14 @@ else()
     endif()
 endif()
 
+
+#################################################################################
+# PGI doesn't support a SYSTEM flag for include directories. Since this is CMake's
+# default for imported targets, we need to disable this feature for PGI.
+#################################################################################
+if(${C_COMPILER_FAMILY_IS_PGI})
+    set(CMAKE_NO_SYSTEM_FROM_IMPORTED TRUE)
+endif()
 
 ################################################
 # Support for extra compiler flags and defines

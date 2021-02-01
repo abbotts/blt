@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019, Lawrence Livermore National Security, LLC and
+# Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
 # other BLT Project Developers. See the top-level COPYRIGHT file for details
 # 
 # SPDX-License-Identifier: (BSD-3-Clause)
@@ -65,6 +65,19 @@ if (ENABLE_FORTRAN AND ENABLE_FRUIT)
                  COMMAND blt_fruit_smoke)
 endif()
 
+###############
+# fruit mpi test
+###############
+if (ENABLE_FORTRAN AND ENABLE_FRUIT AND ENABLE_MPI AND ENABLE_FRUIT_MPI)
+    blt_add_executable(NAME blt_fruit_mpi_smoke
+                       SOURCES blt_fruit_mpi_smoke.f90
+                       OUTPUT_DIR ${TEST_OUTPUT_DIRECTORY}
+                       DEPENDS_ON fruit_mpi
+                       FOLDER blt/tests )
+
+    blt_add_test(NAME blt_fruit_mpi_smoke
+                 COMMAND blt_fruit_mpi_smoke)
+endif()
 
 ################
 # OpenMP test
@@ -144,6 +157,17 @@ if (ENABLE_CUDA)
                      COMMAND blt_cuda_mpi_smoke
                      NUM_MPI_TASKS 4)
     endif()
+
+    if(ENABLE_GTEST)
+        blt_add_executable(NAME blt_cuda_gtest_smoke
+                           SOURCES blt_cuda_gtest_smoke.cpp
+                           OUTPUT_DIR ${TEST_OUTPUT_DIRECTORY}
+                           DEPENDS_ON cuda gtest
+                           FOLDER blt/tests )
+
+        blt_add_test(NAME    blt_cuda_gtest_smoke
+                     COMMAND blt_cuda_gtest_smoke)
+    endif()
 endif()
 
 ################
@@ -192,5 +216,16 @@ if (ENABLE_HIP)
 
     blt_add_test(NAME blt_hip_runtime_smoke
                  COMMAND blt_hip_runtime_smoke)
+
+    if(ENABLE_GTEST)
+        blt_add_executable(NAME blt_hip_gtest_smoke
+                           SOURCES blt_hip_gtest_smoke.cpp
+                           OUTPUT_DIR ${TEST_OUTPUT_DIRECTORY}
+                           DEPENDS_ON gtest hip
+                           FOLDER blt/tests )
+
+        blt_add_test(NAME    blt_hip_gtest_smoke
+                     COMMAND blt_hip_gtest_smoke)
+    endif()
 
 endif()

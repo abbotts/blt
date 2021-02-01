@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019, Lawrence Livermore National Security, LLC and
+# Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
 # other BLT Project Developers. See the top-level COPYRIGHT file for details
 # 
 # SPDX-License-Identifier: (BSD-3-Clause)
@@ -177,10 +177,10 @@ if (ENABLE_FORTRAN)
     endif()
 endif()
 
-# Create the registered library
-blt_register_library(NAME          mpi
-                     INCLUDES      ${_mpi_includes}
-                     TREAT_INCLUDES_AS_SYSTEM ON
-                     LIBRARIES     ${_mpi_libraries}
-                     COMPILE_FLAGS ${_mpi_compile_flags}
-                     LINK_FLAGS    ${_mpi_link_flags} )
+blt_import_library(NAME          mpi
+                   INCLUDES      ${_mpi_includes}
+                   TREAT_INCLUDES_AS_SYSTEM ON
+                   LIBRARIES     ${_mpi_libraries}
+                   COMPILE_FLAGS ${_mpi_compile_flags}
+                   LINK_FLAGS    ${_mpi_link_flags} 
+                   EXPORTABLE    ${BLT_EXPORT_THIRDPARTY})
