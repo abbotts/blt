@@ -43,7 +43,7 @@ set(HIP_RUNTIME_COMPILE_FLAGS "${HIP_RUNTIME_COMPILE_FLAGS};-D${HIP_RUNTIME_DEFI
 if (ENABLE_CLANG_HIP)
     blt_import_library(NAME      hip,
                        COMPILE_FLAGS "-x hip")
-else
+else()
     blt_import_library(NAME      hip)
 endif()
 
