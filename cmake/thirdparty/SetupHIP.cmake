@@ -55,5 +55,6 @@ blt_import_library(NAME          hip_runtime
                    INCLUDES      ${HIP_RUNTIME_INCLUDE_DIRS}
                    DEFINES       ${HIP_RUNTIME_DEFINES}
                    COMPILE_FLAGS ${HIP_RUNTIME_COMPILE_FLAGS}
+                   LINK_FLAGS -lamdhip64;-L${HIP_ROOT_DIR}/lib
                    TREAT_INCLUDES_AS_SYSTEM ON
                    EXPORTABLE    ${BLT_EXPORT_THIRDPARTY})
