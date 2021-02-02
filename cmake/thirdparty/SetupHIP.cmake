@@ -33,7 +33,7 @@ if ( IS_DIRECTORY "${HIP_ROOT_DIR}/hcc/include" ) # this path only exists on old
 else()
         set(HIP_RUNTIME_INCLUDE_DIRS "${HIP_ROOT_DIR}/include" CACHE STRING "")
 endif()
-set(HIP_RUNTIME_COMPILE_FLAGS "${HIP_RUNTIME_COMPILE_FLAGS};-D${HIP_RUNTIME_DEFINE};-Wno-unused-parameter")
+set(HIP_RUNTIME_COMPILE_FLAGS "${HIP_RUNTIME_COMPILE_FLAGS};-Wno-unused-parameter")
 
 # depend on 'hip', if you need to use hip
 # headers, link to hip libs, and need to run your source
@@ -42,7 +42,8 @@ set(HIP_RUNTIME_COMPILE_FLAGS "${HIP_RUNTIME_COMPILE_FLAGS};-D${HIP_RUNTIME_DEFI
 # of all required HIP-related includes/libraries/flags.
 if (ENABLE_CLANG_HIP)
     blt_import_library(NAME      hip,
-                       COMPILE_FLAGS "-x hip")
+                       COMPILE_FLAGS "-x hip"
+                       LINK_FLAGS -lamdhip64;-L${HIP_ROOT_DIR}/lib)
 else()
     blt_import_library(NAME      hip)
 endif()
