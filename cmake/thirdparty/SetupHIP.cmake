@@ -42,7 +42,7 @@ set(HIP_RUNTIME_COMPILE_FLAGS "${HIP_RUNTIME_COMPILE_FLAGS};-Wno-unused-paramete
 # of all required HIP-related includes/libraries/flags.
 if (ENABLE_CLANG_HIP)
     blt_import_library(NAME      hip
-                       COMPILE_FLAGS "-x hip"
+                       COMPILE_FLAGS -x;hip
                        LINK_FLAGS -lamdhip64;-L${HIP_ROOT_DIR}/lib)
 else()
     blt_import_library(NAME      hip)
