@@ -41,7 +41,7 @@ set(HIP_RUNTIME_COMPILE_FLAGS "${HIP_RUNTIME_COMPILE_FLAGS};-Wno-unused-paramete
 # This is currently used only as an indicator for blt_add_hip* -- FindHIP/hipcc will handle resolution
 # of all required HIP-related includes/libraries/flags.
 if (ENABLE_CLANG_HIP)
-    blt_import_library(NAME      hip,
+    blt_import_library(NAME      hip
                        COMPILE_FLAGS "-x hip"
                        LINK_FLAGS -lamdhip64;-L${HIP_ROOT_DIR}/lib)
 else()
