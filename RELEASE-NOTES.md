@@ -9,15 +9,15 @@ The project release numbers follow [Semantic Versioning](http://semver.org/spec/
 
 ## [Unreleased] - Release date yyyy-mm-dd
 
+## [Version 0.4.0] - Release date 2021-04-09
+
 ## Added
-- Added variable BLT_CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES_EXCLUDE to allow removing
-  implicit link directories added to CUDA executables by CMake. See the following example host-config:
-  host-configs/llnl/blueos_3_ppc64le_ib_p9/clang@upstream_nvcc_c++17.cmake
+- Added variable ``BLT_CMAKE_IMPLICIT_LINK_DIRECTORIES_EXCLUDE`` for filtering
+  link directories implicitly added by CMake. See the following example host-config:
+  ``host-configs/llnl/blueos_3_ppc64le_ib_p9/clang@upstream_nvcc_c++17.cmake``
 - Added support for clang-tidy static analysis check
 - Added ability to change the output name of an executable via the OUTPUT_NAME
   parameter of blt_add_executable
-- Added variable BLT_CMAKE_IMPLICIT_LINK_DIRECTORIES_EXCLUDE that will be used to filter
-  implicit link directories for all languages
 - Added user option for enforcing specific versions of autoformatters - the new options are
   ``BLT_REQUIRED_ASTYLE_VERSION``, ``BLT_REQUIRED_CLANGFORMAT_VERSION``, and ``BLT_REQUIRED_UNCRUSTIFY_VERSION``
 - Added ``HEADERS`` to ``blt_add_executable``.  This is important for build system dependency tracking
@@ -31,6 +31,8 @@ The project release numbers follow [Semantic Versioning](http://semver.org/spec/
 - Added an EXPORTABLE option to ``blt_import_library`` that allows imported libraries to be
   added to an export set and installed.
 - Added FRUIT's MPI parallel unit test reporting to BLT's internal copy of FRUIT
+- CUDA device links for object libraries can be enabled with the existing ``CUDA_RESOLVE_DEVICE_SYMBOLS``
+  target property.
 
 ### Changed
 - MPI Support when using CMake 3.13 and newer: MPI linker flags are now passed
@@ -50,8 +52,8 @@ The project release numbers follow [Semantic Versioning](http://semver.org/spec/
 - Turn off system includes for registered libraries when using the PGI compiler
 - Removed unneeded SYSTEM includes added by googletest that was causing problems
   in PGI builds (BLT was adding them already to the register library calls)
-- Removed variable BLT_CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES_EXCLUDE, functionality now
-  provided for all languages using BLT_CMAKE_IMPLICIT_LINK_DIRECTORIES_EXCLUDE variable
+- Removed variable ``BLT_CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES_EXCLUDE``, functionality now
+  provided for all languages using ``BLT_CMAKE_IMPLICIT_LINK_DIRECTORIES_EXCLUDE`` variable
 - ClangQuery was being auto-enabled in cases where no checker directories where defined.
   This caused a crash. blt_add_clang_query_target learned parameter CHECKER_DIRECTORIES
   and blt_add_code_checks learned parameter CLANGQUERY_CHECKER_DIRECTORIES.  Both still
@@ -72,6 +74,7 @@ The project release numbers follow [Semantic Versioning](http://semver.org/spec/
   will automatically be linked with the HIP or CUDA (NVCC) linker
 - Patched an issue with the FindHIP macros that added the inclusive scan of specified
   DEFINEs to compile commands
+- Re-added previous OpenMP flag patching logic to maintain compatibility with BLT-registered libraries
 
 ## [Version 0.3.6] - Release date 2020-07-27
 
@@ -199,7 +202,8 @@ The project release numbers follow [Semantic Versioning](http://semver.org/spec/
 
 
 
-[Unreleased]:    https://github.com/LLNL/blt/compare/v0.3.6...develop
+[Unreleased]:    https://github.com/LLNL/blt/compare/v0.4.0...develop
+[Version 0.4.0]: https://github.com/LLNL/blt/compare/v0.3.6...v0.4.0
 [Version 0.3.6]: https://github.com/LLNL/blt/compare/v0.3.5...v0.3.6
 [Version 0.3.5]: https://github.com/LLNL/blt/compare/v0.3.0...v0.3.5
 [Version 0.3.0]: https://github.com/LLNL/blt/compare/v0.2.5...v0.3.0

@@ -1,10 +1,10 @@
 # Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
-# other BLT Project Developers. See the top-level COPYRIGHT file for details
+# other BLT Project Developers. See the top-level LICENSE file for details
 # 
 # SPDX-License-Identifier: (BSD-3-Clause)
 
 if (NOT BLT_LOADED)
-    set(BLT_VERSION "0.3.6" CACHE STRING "")
+    set(BLT_VERSION "0.4.0" CACHE STRING "")
     mark_as_advanced(BLT_VERSION)
     message(STATUS "BLT Version: ${BLT_VERSION}")
 

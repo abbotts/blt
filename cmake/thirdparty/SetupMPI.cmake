@@ -1,5 +1,5 @@
 # Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
-# other BLT Project Developers. See the top-level COPYRIGHT file for details
+# other BLT Project Developers. See the top-level LICENSE file for details
 # 
 # SPDX-License-Identifier: (BSD-3-Clause)
 
@@ -31,7 +31,13 @@ set(_mpi_includes )
 set(_mpi_libraries )
 set(_mpi_link_flags )
 
-message(STATUS "Enable FindMPI:  ${ENABLE_FIND_MPI}")
+
+if(ENABLE_FIND_MPI)
+    message(STATUS "FindMPI Enabled  (ENABLE_FIND_MPI == ON)")
+else()
+    message(STATUS "FindMPI Disabled (ENABLE_FIND_MPI == OFF) ")
+endif()
+
 
 if (ENABLE_FIND_MPI)
     find_package(MPI REQUIRED)

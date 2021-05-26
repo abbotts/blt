@@ -1,5 +1,5 @@
 # Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
-# other BLT Project Developers. See the top-level COPYRIGHT file for details
+# other BLT Project Developers. See the top-level LICENSE file for details
 # 
 # SPDX-License-Identifier: (BSD-3-Clause)
 
@@ -20,6 +20,7 @@ if(ENABLE_GTEST)
     blt_add_test( NAME blt_gtest_smoke
                   COMMAND blt_gtest_smoke)
 endif()
+
 
 ################
 # gmock test
@@ -136,6 +137,14 @@ if (ENABLE_CUDA)
     blt_add_test(NAME blt_cuda_runtime_smoke
                  COMMAND blt_cuda_runtime_smoke)
 
+    blt_add_executable(NAME blt_cuda_version_smoke
+                       SOURCES blt_cuda_version_smoke.cpp
+                       OUTPUT_DIR ${TEST_OUTPUT_DIRECTORY} 
+                       DEPENDS_ON cuda_runtime
+                       FOLDER blt/tests )
+
+    blt_add_test(NAME blt_cuda_version_smoke
+                 COMMAND blt_cuda_version_smoke)
     if (ENABLE_OPENMP)
         blt_add_executable(NAME blt_cuda_openmp_smoke
                            SOURCES blt_cuda_openmp_smoke.cpp

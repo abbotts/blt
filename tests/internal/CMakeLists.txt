@@ -1,5 +1,5 @@
 # Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
-# other BLT Project Developers. See the top-level COPYRIGHT file for details
+# other BLT Project Developers. See the top-level LICENSE file for details
 # 
 # SPDX-License-Identifier: (BSD-3-Clause)
 
@@ -91,10 +91,6 @@ if(ENABLE_GTEST)
     set(_try_combine_static_libs ON)
 
     if(CMAKE_HOST_WIN32)
-        set(_try_combine_static_libs OFF)
-    endif()
-
-    if ("$ENV{SYS_TYPE}" STREQUAL "bgqos_0")
         set(_try_combine_static_libs OFF)
     endif()
 

@@ -1,5 +1,5 @@
 # Copyright (c) 2017-2021, Lawrence Livermore National Security, LLC and
-# other BLT Project Developers. See the top-level COPYRIGHT file for details
+# other BLT Project Developers. See the top-level LICENSE file for details
 #
 # SPDX-License-Identifier: (BSD-3-Clause)
 
@@ -92,6 +92,7 @@ endfunction()
 function(blt_fix_fortran_openmp_flags target_name)
 
     if (ENABLE_FORTRAN AND ENABLE_OPENMP AND BLT_OPENMP_FLAGS_DIFFER)
+
         # The OpenMP interface library will have been added as a direct
         # link dependency instead of via flags
         get_target_property(target_link_libs ${target_name} LINK_LIBRARIES)
@@ -101,11 +102,18 @@ function(blt_fix_fortran_openmp_flags target_name)
             # the DAG.  Only the link flags need to be modified.
             list(FIND target_link_libs "openmp" _omp_index)
             if(${_omp_index} GREATER -1)
-                list(REMOVE_ITEM target_link_libs "openmp")
+                message(STATUS "Fixing OpenMP Flags for target[${target_name}]")
 
-                # Copy the compile flags verbatim
+                # Remove openmp from libraries
+                list(REMOVE_ITEM target_link_libs "openmp")
+                set_target_properties( ${target_name} PROPERTIES
+                                       LINK_LIBRARIES "${target_link_libs}" )
+
+                # Add openmp compile flags verbatim w/ generator expression
                 get_target_property(omp_compile_flags openmp INTERFACE_COMPILE_OPTIONS)
                 target_compile_options(${target_name} PUBLIC ${omp_compile_flags})
+
+                # Change CXX flags to Fortran flags
 
                 # These are set through blt_add_target_link_flags which needs to use
                 # the link_libraries for interface libraries in CMake < 3.13
@@ -114,16 +122,37 @@ function(blt_fix_fortran_openmp_flags target_name)
                 else()
                     get_target_property(omp_link_flags openmp INTERFACE_LINK_LIBRARIES)
                 endif()
-    
+
                 string( REPLACE "${OpenMP_CXX_FLAGS}" "${OpenMP_Fortran_FLAGS}"
                         correct_omp_link_flags
                         "${omp_link_flags}"
                         )
-                list(APPEND target_link_libs "${correct_omp_link_flags}")
-                set_target_properties( ${target_name} PROPERTIES
-                                       LINK_LIBRARIES "${target_link_libs}" )
+                if( ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0" )
+                    target_link_options(${target_name} PRIVATE "${correct_omp_link_flags}")
+                else()
+                    set_property(TARGET ${target_name} APPEND PROPERTY LINK_FLAGS "${correct_omp_link_flags}")
+                endif()
             endif()
 
+            # Handle registered library general case
+
+            # OpenMP is an interface library which doesn't have a LINK_FLAGS property
+            # in versions < 3.13
+            set(_property_name LINK_FLAGS)
+            if( ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0" )
+                # In CMake 3.13+, LINK_FLAGS was converted to LINK_OPTIONS.
+                set(_property_name LINK_OPTIONS)
+            endif()
+            get_target_property(target_link_flags ${target_name} ${_property_name})
+            if ( target_link_flags )
+
+                string( REPLACE "${OpenMP_CXX_FLAGS}" "${OpenMP_Fortran_FLAGS}"
+                        correct_link_flags
+                        "${target_link_flags}"
+                        )
+                set_target_properties( ${target_name} PROPERTIES ${_property_name}
+                                    "${correct_link_flags}" )
+            endif()
         endif()
 
     endif()
@@ -224,49 +253,51 @@ macro(blt_inherit_target_info)
         message( FATAL_ERROR "Must provide a FROM argument to the 'blt_inherit_target' macro" )
     endif()
 
+    blt_determine_scope(TARGET ${arg_TO} OUT _scope)
+
     get_target_property(_interface_system_includes
                         ${arg_FROM} INTERFACE_SYSTEM_INCLUDE_DIRECTORIES)
     if ( _interface_system_includes )
-        target_include_directories(${arg_TO} SYSTEM PUBLIC ${_interface_system_includes})
+        target_include_directories(${arg_TO} SYSTEM ${_scope} ${_interface_system_includes})
     endif()
 
     get_target_property(_interface_includes
                         ${arg_FROM} INTERFACE_INCLUDE_DIRECTORIES)
     if ( _interface_includes )
-        target_include_directories(${arg_TO} PUBLIC ${_interface_includes})
+        target_include_directories(${arg_TO} ${_scope} ${_interface_includes})
     endif()
 
     get_target_property(_interface_defines
                         ${arg_FROM} INTERFACE_COMPILE_DEFINITIONS)
     if ( _interface_defines )
-        target_compile_definitions( ${arg_TO} PUBLIC ${_interface_defines})
+        target_compile_definitions( ${arg_TO} ${_scope} ${_interface_defines})
     endif()
 
     if( ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0" )
         get_target_property(_interface_link_options
                             ${arg_FROM} INTERFACE_LINK_OPTIONS)
         if ( _interface_link_options )
-            target_link_options( ${arg_TO} PUBLIC ${_interface_link_options})
+            target_link_options( ${arg_TO} ${_scope} ${_interface_link_options})
         endif()
     endif()
 
     get_target_property(_interface_compile_options
                         ${arg_FROM} INTERFACE_COMPILE_OPTIONS)
     if ( _interface_compile_options )
-        target_compile_options( ${arg_TO} PUBLIC ${_interface_compile_options})
+        target_compile_options( ${arg_TO} ${_scope} ${_interface_compile_options})
     endif()
 
     if ( NOT arg_OBJECT )
         get_target_property(_interface_link_directories
                             ${arg_FROM} INTERFACE_LINK_DIRECTORIES)
         if ( _interface_link_directories )
-            target_link_directories( ${arg_TO} PUBLIC ${_interface_link_directories})
+            target_link_directories( ${arg_TO} ${_scope} ${_interface_link_directories})
         endif()
 
         get_target_property(_interface_link_libraries
                             ${arg_FROM} INTERFACE_LINK_LIBRARIES)
         if ( _interface_link_libraries )
-            target_link_libraries( ${arg_TO} PUBLIC ${_interface_link_libraries})
+            target_link_libraries( ${arg_TO} ${_scope} ${_interface_link_libraries})
         endif()
     endif()
 
@@ -422,15 +453,37 @@ macro(blt_setup_target)
             blt_add_target_link_flags(TO ${arg_NAME}
                                       FLAGS ${_BLT_${uppercase_dependency}_LINK_FLAGS} )
         endif()
-        # Propagate the overridden linker language, if applicable
+
         if(TARGET ${dependency})
             # If it's an interface library CMake doesn't even allow us to query the property
             get_target_property(_dep_type ${dependency} TYPE)
             if(NOT "${_dep_type}" STREQUAL "INTERFACE_LIBRARY")
+                # Propagate the overridden linker language, if applicable
                 get_target_property(_blt_link_lang ${dependency} INTERFACE_BLT_LINKER_LANGUAGE_OVERRIDE)
                 # TODO: Do we need to worry about overwriting?  Should only ever be HIP or CUDA
                 if(_blt_link_lang)
                     set_target_properties(${arg_NAME} PROPERTIES INTERFACE_BLT_LINKER_LANGUAGE_OVERRIDE ${_blt_link_lang})
+                endif()
+            endif()
+
+            # Check if a separate device link is needed
+            if(ENABLE_CUDA AND "${_dep_type}" STREQUAL "OBJECT_LIBRARY")
+                get_target_property(_device_link ${dependency} CUDA_RESOLVE_DEVICE_SYMBOLS)
+                if(_device_link AND CUDA_LINK_WITH_NVCC)
+                    set(_dlink_obj "${dependency}_device_link${CMAKE_CUDA_OUTPUT_EXTENSION}")
+                    # Make sure a target wasn't already added
+                    get_source_file_property(_generated ${_dlink_obj} GENERATED)
+                    if(NOT _generated)
+                        # Convert string to list as it will be expanded
+                        string(REPLACE " " ";" _cuda_flags ${CMAKE_CUDA_FLAGS})
+                        add_custom_command(
+                            OUTPUT ${_dlink_obj}
+                            COMMAND ${CMAKE_CUDA_COMPILER} --device-link ${_cuda_flags} $<TARGET_OBJECTS:${dependency}> -o ${_dlink_obj}
+                            DEPENDS $<TARGET_OBJECTS:${dependency}>
+                            COMMAND_EXPAND_LISTS
+                        )
+                    endif()
+                    target_sources(${arg_NAME} PRIVATE ${_dlink_obj})
                 endif()
             endif()
         endif()
@@ -513,6 +566,12 @@ macro(blt_setup_cuda_target)
                 set_target_properties( ${arg_NAME} PROPERTIES
                                        CMAKE_CUDA_CREATE_STATIC_LIBRARY OFF)
             endif()
+        endif()
+
+        # Replicate the behavior of CMAKE_CUDA_RESOLVE_DEVICE_SYMBOLS
+        if(${CMAKE_VERSION} VERSION_LESS "3.16.0" AND CMAKE_CUDA_RESOLVE_DEVICE_SYMBOLS)
+            set_target_properties( ${arg_NAME} PROPERTIES
+                                   CUDA_RESOLVE_DEVICE_SYMBOLS ON)
         endif()
     endif()
 endmacro(blt_setup_cuda_target)

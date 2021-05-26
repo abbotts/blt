@@ -1,10 +1,12 @@
 .. # Copyright (c) 2017-2020, Lawrence Livermore National Security, LLC and
-.. # other BLT Project Developers. See the top-level COPYRIGHT file for details
+.. # other BLT Project Developers. See the top-level LICENSE file for details
 .. #
 .. # SPDX-License-Identifier: (BSD-3-Clause)
 
 Code Metric Macros
 ==================
+
+.. _blt_add_code_coverage_target:
 
 blt_add_code_coverage_target
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
